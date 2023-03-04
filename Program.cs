@@ -195,29 +195,9 @@ namespace Fluid_Sim {
             var keyboard = KeyboardState;
             if (keyboard[Keys.Escape]) terminated = true;
 
-            SetRandomColour();
+            //SetRandomColour();
 
             Time.Update();
-        }
-
-        void SetRandomColour() {
-
-            Func<Vector3, int> mixColour = (Vector3 c) => ((int)c.X<<16) + ((int)c.Y<<8) + (int)c.Z;
-
-            // Assign a random pixel in surface with a random colour
-            Random random = new Random();
-
-            int x = random.Next(0, Size.X);
-            int y = random.Next(0, Size.Y);
-
-            Vector3 randomColour = new Vector3(
-                (float) random.NextDouble() * 255f,
-                (float) random.NextDouble() * 255f,
-                (float) random.NextDouble() * 255f
-            );
-
-            screen.Plot(x, y, mixColour(randomColour));
-            Console.WriteLine($"Plotted colour {randomColour} at X:{x} Y:{y}");
         }
 
 
