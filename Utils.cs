@@ -11,6 +11,8 @@ namespace Fluid_Sim {
 
         /// <summary>
         /// This function is here to test the surface class
+        /// It will generate a random colour and plot it on a random
+        ///  position on the target surface
         /// </summary>
         public static void SetRandomColour(Surface surf) {
 

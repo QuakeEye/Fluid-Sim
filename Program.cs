@@ -31,6 +31,7 @@ namespace Fluid_Sim {
         // Texture and ID for opengl per-pixel drawing
         Surface screen;
         int screenID;
+        Sim fluidSim;
 
 
         // OpenGL stuff (gotten from template)
@@ -68,7 +69,12 @@ namespace Fluid_Sim {
             GL.ClearColor(0, 0, 0, 0);
             GL.Disable(EnableCap.DepthTest);
 
+            // Initialise the global random
+            Globals.random = new Random();
+
             screen = new Surface(Size.X, Size.Y);
+
+            fluidSim = new(screen, new Vector2i(200, 100));
             
             LoadOpenGL(screen);
         }
@@ -191,6 +197,9 @@ namespace Fluid_Sim {
 
             base.OnUpdateFrame(e);
 
+            // Make sure to call the sim update
+            fluidSim.Update();
+
             // Quit the program once escape key has been pressed
             var keyboard = KeyboardState;
             if (keyboard[Keys.Escape]) terminated = true;
@@ -206,6 +215,9 @@ namespace Fluid_Sim {
             base.OnRenderFrame(e);
 
             if (terminated) { Close(); return; }
+
+            // Make sure to call the sim render
+            fluidSim.Render();
             
             // Convert MyApplication.screen to OpenGL texture
             GL.BindTexture(TextureTarget.Texture2D, screenID);
