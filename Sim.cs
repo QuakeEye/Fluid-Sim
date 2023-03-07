@@ -9,6 +9,12 @@ namespace Fluid_Sim {
                                 //  displayed by the template
         int[,] simSpace;        // 2 dimensional array which represents our fluid simulation world
 
+
+        // Fluid value grids
+        Vector2[,] velField;    // Velocity vector field
+        float[,] densField;     // Density field
+
+
         Vector2i simSpaceSize;  // Defined size of the simulation world
         
         
@@ -20,7 +26,11 @@ namespace Fluid_Sim {
             // Save the world size and set up the integer array
             simSpaceSize = spaceSize;
             simSpace = new int[simSpaceSize.X, simSpaceSize.Y];
-            simSpace = Utils.Populate2DArray(simSpace, int.MaxValue);
+            simSpace = Utils.Populate2DArray(simSpace, 0);
+
+            // Set up the world for fluid values
+            velField = new Vector2[simSpaceSize.X, simSpaceSize.Y];
+            densField = new float[simSpaceSize.X, simSpaceSize.Y];
         }
 
 
@@ -28,7 +38,61 @@ namespace Fluid_Sim {
         //  should be called every frame
         public void Update() {
 
-            Utils.SetRandomColour(simSpace);
+            // Updating is made up of 3 main parts in this basic fluid sim:
+            //  1. Diffuse the world, aka spread values through the world
+            //  2. Advect the world, aka move values through the world
+            //  3. Clear divergence, remove divergence from the world, as we are not god
+
+            // Exexcute part 1
+            Diffuse();
+
+            // Execute part 2
+            //Advect();
+
+            // Execute part 3
+            //ClearDivergence();
+        }
+
+
+        /// <summary>
+        /// This function will diffuse the worlds
+        ///  spreading cells values to the surrounding area
+        //  Actual algorithm info in the function
+        /// </summary>
+        void Diffuse() {
+
+            // Part 1: Diffusion
+            // Even though velocities are the most important bit in fluid simulation,
+            //  the first step, diffusion, is independent of the velocity field,
+            //  as we are simply diffusing values throughout the world space
+            // Simply said: diffusion is about attributes in a cell in the 
+            //  fluid spreading to the surrounding area
+            // Our goal is to have cells have values that gradually become the
+            //  average of it and its surrounding cells
+
+            // First, let's work on the diffusion of density
+            //  we need to define some conceptual things:
+            //  - d(x, y) = density at cell (x, y)
+            //  - s(x, y) = average density of surrounding cells (just the surrounding cells!)
+            //      --> (d(x + 1, y) + d(x - 1, y) + d(x, y + 1) + d(x, y - 1))  /  4
+            //  - k = diffusion constant, how fast the diffusion should occur
+            //      aka, k is the amount of change we will have in this diffusion per timestep
+            
+            // So, to reiterate with these definitions, we want d to gradually
+            //  become s
+            // dn = dc + k * (sc - dc) would be an approach, but this will
+            //  will result into a linear interpolation approach, which is not ideal, as
+            //  we could easily overshoot the s value, which would have unstable results
+            //  in the simulation
+
+            // To solve this, we will swap the next and current values to trace back, then
+            //  rewrite this to obtain the following equation
+            // dn = (dc + k.sn) / (1 + k)
+            // This is a hyperbolic relation, instead of a linear one, so we will never overshoot
+            //  and rather converge to our value
+
+
+            // Gauss seidel...
         }
 
 
