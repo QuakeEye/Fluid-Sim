@@ -21,16 +21,27 @@ namespace Fluid_Sim {
         // Constructor that will set up our world
         public Sim(Surface target, Vector2i spaceSize) {
 
+            // Set up the render target, this represents the actual screen
             renderTarget = target;
+
 
             // Save the world size and set up the integer array
             simSpaceSize = spaceSize;
             simSpace = new int[simSpaceSize.X, simSpaceSize.Y];
             simSpace = Utils.Populate2DArray(simSpace, 0);
 
+
             // Set up the world for fluid values
             velField = new Vector2[simSpaceSize.X, simSpaceSize.Y];
             densField = new float[simSpaceSize.X, simSpaceSize.Y];
+            // initialise boundaries here
+
+
+            // Fill these fields with initial values
+            Utils.Populate2DArray(velField, new Vector2(0f, 0f));
+            Utils.Populate2DArray(densField, 1f);
+            // this still needs to be (properly) done
+            // boundaries should also be set here, and should be initialised above
         }
 
 
@@ -47,10 +58,15 @@ namespace Fluid_Sim {
             Diffuse();
 
             // Execute part 2
-            //Advect();
+            Advect();
 
             // Execute part 3
-            //ClearDivergence();
+            ClearDivergence();
+
+
+            // For debugging purposes, print some position in the field's density
+            //  this should be removed later
+            Console.WriteLine(densField[10, 10]);
         }
 
 
@@ -59,7 +75,7 @@ namespace Fluid_Sim {
         ///  spreading cells values to the surrounding area
         //  Actual algorithm info in the function
         /// </summary>
-        void Diffuse() {
+        private void Diffuse() {
 
             // Part 1: Diffusion
             // Even though velocities are the most important bit in fluid simulation,
@@ -91,8 +107,50 @@ namespace Fluid_Sim {
             // This is a hyperbolic relation, instead of a linear one, so we will never overshoot
             //  and rather converge to our value
 
+            // The only problem with this solution, is that we need the surrouding average density
+            //  of the next time step, which we don't have yet
+            // We can fill in what that sn really is, and we will see a system of equatins appear
+            // We will solve this system by using the Gauss Seidel method (more info in notion)
 
-            // Gauss seidel...
+
+            // The Gauss-Seidel method basically uses random values, and keeps pluggin them into
+            //  the system of equations, until it converges to a solution
+            // A requirement for this method is that the system of equations is diagonally dominant,
+            //  but in this case that is *always* the case, info in notion
+
+            // So, using the Gauss-Seidel method we will converge the sn (next step surrounding density)
+            //  to the correct value, and then we can use that to calculate the next step density
+
+            for (int x = 0; x < simSpaceSize.X; x++) {
+                for (int y = 0; y < simSpaceSize.Y; y++) {
+
+                    // First, set up the values needed for the Gauss-Seidel method
+                    // Density field is densField
+                    Vector2i currentCell = new Vector2i(x, y);
+
+                    float surrNext = Solvers.GaussSeidelSolve(currentCell, densField, simSpaceSize, 0.1f);
+                        // TODO: remove this magic number, I do not know what it is right now
+
+                    // After this, we can use this converged value to calculate the next density using
+                    //  the equation above
+                    float densNext = (densField[x, y] + Globals.k * surrNext) / (1 + Globals.k);
+
+                    // And finally, we can set the next density to this newly calculated density
+                    densField[x, y] = densNext;
+                }
+            }
+        }
+
+
+        private void Advect() {
+
+
+        }
+
+
+        private void ClearDivergence() {
+
+
         }
 
 
@@ -119,9 +177,17 @@ namespace Fluid_Sim {
                         for (int j = 0; j < heightScaler; j++) {
 
                             // For now, just plot this arbitrary pixel colour directly
+                            /*renderTarget.Plot(  x + i, 
+                                                y + j, 
+                                                simSpace[x / widthScaler, y / heightScaler]);*/
+
+                            // Let's draw the density field out to the screen for visual purposes
                             renderTarget.Plot(  x + i, 
                                                 y + j, 
-                                                simSpace[x / widthScaler, y / heightScaler]);
+                                                Utils.mixColour(
+                                                    new Vector3(
+                                                        densField[x / widthScaler, y / heightScaler] * 255f
+                                                )));
                         }
                     }
                 }

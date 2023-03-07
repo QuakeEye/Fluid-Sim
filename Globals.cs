@@ -4,5 +4,9 @@ namespace Fluid_Sim {
 
         // Globals data members
         public static Random random;
+
+
+        // Constant members
+        public static float k = 0.1f;
     }
 }
