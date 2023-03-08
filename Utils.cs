@@ -61,5 +61,20 @@ namespace Fluid_Sim {
 
             return array;
         }
+
+
+        /// <summary>
+        /// Helper function to populate a 2d array with random values
+        /// The only values that are supported lie between the range 0 and max
+        /// This function only supports float types
+        /// <summary>
+        public static float[,] Populate2DArrayRandom(float[,] array, float min, float max) {
+
+            for (int i = 0; i < array.GetLength(0); i++)
+                for (int j = 0; j < array.GetLength(1); j++)
+                    array[i, j] = (float) Globals.random.NextDouble() * (max - min) + min;
+
+            return array;
+        }
     }
 }
