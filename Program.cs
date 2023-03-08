@@ -77,6 +77,10 @@ namespace Fluid_Sim {
             fluidSim = new(screen, new Vector2i(200, 100));
             
             LoadOpenGL(screen);
+
+            // Set up the inputhelper
+            InputHelper.PreviousMouseState = MouseState;
+            InputHelper.CurrentMouseState = MouseState;
         }
 
 
@@ -197,9 +201,15 @@ namespace Fluid_Sim {
 
             base.OnUpdateFrame(e);
 
-            // Make sure to call the sim update
             var keyboard = KeyboardState;
-            fluidSim.Update(keyboard);
+            var mouse = MouseState;
+            
+            // Update our static input helping class
+            InputHelper.Update(keyboard, mouse);
+
+            // Make sure to call the sim update
+            fluidSim.Update();
+            
 
             // Quit the program once escape key has been pressed
             if (keyboard[Keys.Escape]) terminated = true;

@@ -17,5 +17,11 @@ namespace Fluid_Sim {
 
         public const float slowDownValue = 1000000f;
         public const float dt = 0.1f;
+
+
+        // Input data members
+        public const int mouseInputLeftSize = 3;
+        public const int mouseInputRightSize = 3;
+        public const float mouseDensitySetValue = 1;
     }
 }

@@ -40,7 +40,7 @@ namespace Fluid_Sim {
 
             // Fill these fields with initial values
             //Utils.Populate2DVector2Array(velField, .6f, .7f);
-            Utils.BoxFillArray( ref velField, new Vector2i(1), 
+            /*Utils.BoxFillArray( ref velField, new Vector2i(1), 
                                 new Vector2i(simSpaceSize.X / 2, simSpaceSize.Y / 2),
                                 new Vector2(0.5f, -0.5f), -0.5f, 0.5f, true);
             Utils.BoxFillArray( ref velField, new Vector2i(simSpaceSize.X / 2, 1), 
@@ -53,7 +53,7 @@ namespace Fluid_Sim {
                                 new Vector2i(simSpaceSize.X - 1, simSpaceSize.Y - 1),
                                 new Vector2(-0.5f, 0.5f), -0.5f, 0.5f, true);
             
-            Utils.Populate2DArrayRandom(densField, 0.2f, 1f);
+            Utils.Populate2DArrayRandom(densField, 0.2f, 1f);*/
             // this still needs to be (properly) done
             // boundaries should also be set here, and should be initialised above
         }
@@ -61,16 +61,11 @@ namespace Fluid_Sim {
 
         // Function that will move a time step through the simulation, 
         //  should be called every frame
-        public void Update(KeyboardState keyboard) {
+        public void Update() {
 
-            // Check to see if spacebar is pressed so we can continue simulation
-            if(keyboard.IsKeyPressed(Keys.Space))
-                Globals.isRunning = !Globals.isRunning;
-
-            // Check to see if enter is pressed so we can slow or unslow the simulation
-            if(keyboard.IsKeyPressed(Keys.Enter))
-                Globals.isSlowed = !Globals.isSlowed;
-            
+            // Before doing anything, check input to manage the interactive
+            //  part of this fluid simulation
+            HandleInput();
 
             // Make sure not to update when the simulation is paused
             if (!Globals.isRunning)
@@ -93,7 +88,86 @@ namespace Fluid_Sim {
 
             // For debugging purposes, print some position in the field's density
             //  this should be removed later
-            Console.WriteLine(densField[10, 10]);
+            //Console.WriteLine(densField[10, 10]);
+        }
+
+
+        /// <summary>
+        /// This function will handle the input, so the world can be interacted
+        ///  with at runtime
+        /// </summary>
+        void HandleInput() {
+
+            // Check to see if spacebar is pressed so we can continue simulation
+            if(InputHelper.CurrentKeyboardState.IsKeyPressed(Keys.Space))
+                Globals.isRunning = !Globals.isRunning;
+
+            // Check to see if enter is pressed so we can slow or unslow the simulation
+            if(InputHelper.CurrentKeyboardState.IsKeyPressed(Keys.Enter))
+                Globals.isSlowed = !Globals.isSlowed;
+
+
+            // If the mouse butting isn't currently being pressed, we should skip this step
+            if(InputHelper.CurrentMouseState.IsButtonDown(MouseButton.Left)) {
+
+                // To make our simulation interactive, we first need to translate the mouse
+                //  position on screen to mouse position in our world
+                // We can do this using a similar scaling method like we do in rendering
+                Vector2 mousePos = InputHelper.CurrentMouseState.Position;
+                mousePos.X = mousePos.X / renderTarget.Width * simSpaceSize.X;
+                mousePos.Y = mousePos.Y / renderTarget.Height * simSpaceSize.Y;
+
+                // Now, determine what direction we want to set the velocities
+                Vector2 dirSet = InputHelper.MouseDeltaPos;
+
+                // Set the velocity at the mouse position to the direction we want
+                if(mousePos.X >= 0 && mousePos.X < simSpaceSize.X &&
+                mousePos.Y >= 0 && mousePos.Y < simSpaceSize.Y) {
+                    
+                    int minY = Math.Max((int) mousePos.Y - Globals.mouseInputLeftSize, 1);
+                    int minX = Math.Max((int) mousePos.X - Globals.mouseInputLeftSize, 1);
+
+                    int maxY = Math.Min((int) mousePos.Y + Globals.mouseInputLeftSize, 
+                                        simSpaceSize.Y - 1);
+                    int maxX = Math.Min((int) mousePos.X + Globals.mouseInputLeftSize, 
+                                        simSpaceSize.X - 1);
+
+                    for (int y = minY; y <= maxY; y++) {
+                        for (int x = minX; x <= maxX; x++) {
+                            velField[x, y] = dirSet;
+                        }
+                    }
+                }
+            }
+
+
+            // Next, I would like to be able to set the density at the mouse position
+            if(InputHelper.CurrentMouseState.IsButtonDown(MouseButton.Right)) {
+
+                // First, simply get the mouse position
+                Vector2 mousePos = InputHelper.CurrentMouseState.Position;
+                
+                // and scale it from screen to world
+                mousePos.X = mousePos.X / renderTarget.Width * simSpaceSize.X;
+                mousePos.Y = mousePos.Y / renderTarget.Height * simSpaceSize.Y;
+
+                // Now, just set density surrounding the mouse
+                if(mousePos.X >= 0 && mousePos.X < simSpaceSize.X &&
+                mousePos.Y >= 0 && mousePos.Y < simSpaceSize.Y) {
+                    
+                    int minY = Math.Max((int) mousePos.Y - Globals.mouseInputRightSize, 1);
+                    int minX = Math.Max((int) mousePos.X - Globals.mouseInputRightSize, 1);
+
+                    int maxY = Math.Min((int) mousePos.Y + Globals.mouseInputRightSize, 
+                                        simSpaceSize.Y - 1);
+                    int maxX = Math.Min((int) mousePos.X + Globals.mouseInputRightSize, 
+                                        simSpaceSize.X - 1);
+
+                    for (int y = minY; y <= maxY; y++)
+                        for (int x = minX; x <= maxX; x++)
+                            densField[x, y] = Globals.mouseDensitySetValue;
+                }
+            }
         }
 
 
@@ -198,6 +272,12 @@ namespace Fluid_Sim {
                     // We do this by splitting the value in a floor and a decimal part
                     Vector2 floorPos = new Vector2((int) traceBackPos.X, (int) traceBackPos.Y);
                     Vector2 decimalPos = traceBackPos - floorPos;
+
+                    // First, before doing anything, we should check if these are within
+                    //  the bounds of the world
+                    if( floorPos.X < 1 || floorPos.X >= simSpaceSize.X - 1 || 
+                        floorPos.Y < 1 || floorPos.Y >= simSpaceSize.Y - 1)
+                        continue;
 
                     // Now, we need to interpolate the density values of these 4 squares
                     // We do this by first interpolating the 2 top squares and the 2 bottom squares
