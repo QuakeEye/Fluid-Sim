@@ -39,7 +39,20 @@ namespace Fluid_Sim {
 
 
             // Fill these fields with initial values
-            Utils.Populate2DVector2Array(velField, -1f, 1f);
+            //Utils.Populate2DVector2Array(velField, .6f, .7f);
+            Utils.BoxFillArray( ref velField, new Vector2i(1), 
+                                new Vector2i(simSpaceSize.X / 2, simSpaceSize.Y / 2),
+                                new Vector2(0.5f, -0.5f), -0.5f, 0.5f, true);
+            Utils.BoxFillArray( ref velField, new Vector2i(simSpaceSize.X / 2, 1), 
+                                new Vector2i(simSpaceSize.X - 1, simSpaceSize.Y - 1),
+                                new Vector2(0.5f, 0.5f), -0.5f, 0.5f, true);
+            Utils.BoxFillArray( ref velField, new Vector2i(1, simSpaceSize.Y / 2), 
+                                new Vector2i(simSpaceSize.X / 2, simSpaceSize.Y - 1),
+                                new Vector2(-0.5f, -0.5f), -0.5f, 0.5f, true);
+            Utils.BoxFillArray( ref velField, new Vector2i(simSpaceSize.X / 2, simSpaceSize.Y / 2), 
+                                new Vector2i(simSpaceSize.X - 1, simSpaceSize.Y - 1),
+                                new Vector2(-0.5f, 0.5f), -0.5f, 0.5f, true);
+            
             Utils.Populate2DArrayRandom(densField, 0.2f, 1f);
             // this still needs to be (properly) done
             // boundaries should also be set here, and should be initialised above
@@ -166,7 +179,43 @@ namespace Fluid_Sim {
 
         private void Advect() {
 
-            
+            // For advection, it is impossible to calculate forwards in time
+            //  because vectors almost never exactly line up with another square's center,
+            //  so we would have to interpolate between 4 squares, which is kinda difficult
+            // So, what we do once again, is trace back in time, and interpolate between the 4 squares
+            //  that the vector would have been pointing to at that time
+
+            // This is an algorithm we have to perform for each position
+
+            for (int x = 1; x < simSpaceSize.X - 1; x++) {
+                for (int y = 1; y < simSpaceSize.Y - 1; y++) {
+
+                    // First, get the floating point value of the position 
+                    //  we want to trace back to
+                    Vector2 traceBackPos = new Vector2(x, y) - velField[x, y];
+
+                    // We now need to get the position of the cell and the position within the 4 cells
+                    // We do this by splitting the value in a floor and a decimal part
+                    Vector2 floorPos = new Vector2((int) traceBackPos.X, (int) traceBackPos.Y);
+                    Vector2 decimalPos = traceBackPos - floorPos;
+
+                    // Now, we need to interpolate the density values of these 4 squares
+                    // We do this by first interpolating the 2 top squares and the 2 bottom squares
+                    //  then interpolating between these 2 values using the y-coordinate
+                    float topInter = Utils.Lerp(    densField[(int) floorPos.X, (int) floorPos.Y], 
+                                                    densField[(int) floorPos.X + 1, (int) floorPos.Y], 
+                                                    decimalPos.X);
+                    float bottomInter = Utils.Lerp( densField[(int) floorPos.X, (int) floorPos.Y + 1], 
+                                                    densField[(int) floorPos.X + 1, (int) floorPos.Y + 1], 
+                                                    decimalPos.X);
+
+                    // Now, as promised, we will interpolate these using the y value :)
+                    float newDensity = Utils.Lerp(topInter, bottomInter, decimalPos.Y);
+
+                    // And finally, set this newly calculated density value in the density field
+                    densField[x, y] = newDensity;
+                }
+            }
         }
 
 
@@ -197,11 +246,6 @@ namespace Fluid_Sim {
                     // Fill out this kind of box in the render target that is the world scale size
                     for (int i = 0; i < widthScaler; i++) {
                         for (int j = 0; j < heightScaler; j++) {
-
-                            // For now, just plot this arbitrary pixel colour directly
-                            /*renderTarget.Plot(  x + i, 
-                                                y + j, 
-                                                simSpace[x / widthScaler, y / heightScaler]);*/
 
                             // Let's draw the density field out to the screen for visual purposes
                             renderTarget.Plot(  x + i, 

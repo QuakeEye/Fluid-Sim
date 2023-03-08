@@ -14,6 +14,11 @@ namespace Fluid_Sim {
             (float min, float max) => (float) Globals.random.NextDouble() * (max - min) + min;
 
 
+        // Linearly interpolate as discussed in the referenced paper
+        public static Func<float, float, float, float> Lerp =
+            (float a, float b, float k) => a + k * (b - a);
+
+
         /// <summary>
         /// This function is here to test the surface class
         /// It will generate a random colour and plot it on a random
@@ -83,6 +88,9 @@ namespace Fluid_Sim {
         }
 
 
+        /// <summary>
+        /// Helper function to populate a 2d array with random vector 2 values
+        /// <summary>
         public static Vector2[,] Populate2DVector2Array(Vector2[,] array, float min, float max) {
 
             for (int i = 0; i < array.GetLength(0); i++)
@@ -92,6 +100,39 @@ namespace Fluid_Sim {
                     );
 
             return array;
+        }
+
+
+        /// <summary>
+        /// Function that will fill a set of coordinates in a 2d array with a value
+        /// <summary>
+        public static void BoxFillArray<T>(ref T[,] array, Vector2i start, Vector2i end, T value) {
+
+            for (int i = start.X; i < end.X; i++)
+                for (int j = start.Y; j < end.Y; j++)
+                    array[i, j] = value;
+        }
+
+
+        /// <summary>
+        /// Overload function that will instead assign random values within min and max
+        /// Only supports vector 2 values
+        /// </summary>
+        public static void BoxFillArray(ref Vector2[,] array, Vector2i start, Vector2i end, 
+                                        Vector2 value, float min, float max,
+                                        bool randomFill = false, float randomFillChance = 0.9f) {
+
+            if(randomFill) {
+
+                float randomFillDecision = RandomFloat(0f, 1f);
+
+                if(randomFillDecision > randomFillChance)
+                    return;
+            }
+
+            for(int i = start.X; i < end.X; i++)
+                for(int j = start.Y; j < end.Y; j++)
+                    array[i, j] = value + new Vector2(RandomFloat(min, max), RandomFloat(min, max));
         }
     }
 }

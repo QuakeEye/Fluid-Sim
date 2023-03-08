@@ -12,7 +12,7 @@ namespace Fluid_Sim {
                                                 Vector2i simSize, 
                                                 float iterations) {
 
-            float a = Time.DeltaTime * Globals.k * simSize.X * simSize.Y;
+            float a = Time.DeltaTime * Globals.k;
             float[,] nextValField = currValField;
 
             // When the simulation is slowed, manually lower the a value so you can
