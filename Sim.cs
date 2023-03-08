@@ -327,15 +327,16 @@ namespace Fluid_Sim {
                     for (int i = 0; i < widthScaler; i++) {
                         for (int j = 0; j < heightScaler; j++) {
 
+                            float colourComponent = 
+                                densField[x / widthScaler, y / heightScaler] * 255f;
+
                             // Let's draw the density field out to the screen for visual purposes
                             renderTarget.Plot(  x + i, 
                                                 y + j, 
                                                 Utils.MixColour(
-                                                    new Vector3(
-                                                        0f,
-                                                        0f,
-                                                        densField[x / widthScaler, y / heightScaler] * 255f
-                                                )));
+                                                    colourComponent * 
+                                                        (Globals.renderColour / 255f)
+                                                ));
                         }
                     }
                 }

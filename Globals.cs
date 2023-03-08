@@ -1,9 +1,15 @@
+using OpenTK.Mathematics;
+
 namespace Fluid_Sim {
 
     public static class Globals {
 
         // Globals data members
         public static Random random;
+
+        
+        // Render settings
+        public static Vector3 renderColour = new Vector3(234f, 172f, 137f);
 
 
         // Constant members
