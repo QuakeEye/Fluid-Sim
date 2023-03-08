@@ -208,6 +208,8 @@ namespace Fluid_Sim {
                                                 y + j, 
                                                 Utils.mixColour(
                                                     new Vector3(
+                                                        0f,
+                                                        0f,
                                                         densField[x / widthScaler, y / heightScaler] * 255f
                                                 )));
                         }
