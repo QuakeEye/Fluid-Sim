@@ -11,10 +11,15 @@ namespace Fluid_Sim {
         public static float GaussSeidelSolve(   Vector2i currCell, 
                                                 float[,] valField, 
                                                 Vector2i simSize, 
-                                                float tol) {
+                                                float iterations) {
 
-            // TODO: implement gauss seidel
-            return 0.003f;
+            // First, we need to iterate 'iterations' amount of times
+            for(int iter = 0; iter < iterations; iter++) {
+
+                
+            }
+
+            return 0.005f;
         }
     }
 }

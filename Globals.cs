@@ -7,6 +7,7 @@ namespace Fluid_Sim {
 
 
         // Constant members
-        public static float k = 0.1f;
+        public const float gsIters = 20;
+        public const float k = 0.001f;
     }
 }
