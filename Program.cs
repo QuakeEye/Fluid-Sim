@@ -97,7 +97,7 @@ namespace Fluid_Sim {
 
 
             // Vertex Shader
-            string shaderSource = File.ReadAllText("shaders/Screen/screen.vert");
+            string shaderSource = File.ReadAllText("shaders/screen/screen.vert");
             int vertexShader = GL.CreateShader(ShaderType.VertexShader);
             GL.ShaderSource(vertexShader, shaderSource);
             GL.CompileShader(vertexShader);
@@ -111,7 +111,7 @@ namespace Fluid_Sim {
 
 
             // Fragment Shader
-            shaderSource = File.ReadAllText("shaders/Screen/screen.frag");
+            shaderSource = File.ReadAllText("shaders/screen/screen.frag");
             int fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
             GL.ShaderSource(fragmentShader, shaderSource);
             GL.CompileShader(fragmentShader);

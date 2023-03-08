@@ -128,8 +128,10 @@ namespace Fluid_Sim {
                     // Density field is densField
                     Vector2i currentCell = new Vector2i(x, y);
 
-                    float surrNext = Solvers.GaussSeidelSolve(currentCell, densField, simSpaceSize, 0.1f);
-                        // TODO: remove this magic number, I do not know what it is right now
+                    float surrNext = Solvers.GaussSeidelSolve(  currentCell, 
+                                                                densField, 
+                                                                simSpaceSize, 
+                                                                Globals.gsIters);
 
                     // After this, we can use this converged value to calculate the next density using
                     //  the equation above
@@ -144,7 +146,7 @@ namespace Fluid_Sim {
 
         private void Advect() {
 
-
+            
         }
 
 
