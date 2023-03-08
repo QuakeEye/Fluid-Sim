@@ -15,6 +15,11 @@ namespace Fluid_Sim {
             float a = Time.DeltaTime * Globals.k * simSize.X * simSize.Y;
             float[,] nextValField = currValField;
 
+            // When the simulation is slowed, manually lower the a value so you can
+            //  more easily see the algorithm at work
+            if(Globals.isSlowed)
+                a /= Globals.slowDownValue;
+
             // First, we need to iterate 'iterations' amount of times
             for(int iter = 0; iter < iterations; iter++) {
                 for(int x = 1; x < simSize.X - 1; x++) {

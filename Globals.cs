@@ -13,5 +13,8 @@ namespace Fluid_Sim {
 
         // Simluation data members
         public static bool isRunning = false;
+        public static bool isSlowed = true;
+
+        public const float slowDownValue = 1000000f;
     }
 }

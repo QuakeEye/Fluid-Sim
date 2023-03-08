@@ -54,6 +54,11 @@ namespace Fluid_Sim {
             if(keyboard.IsKeyPressed(Keys.Space))
                 Globals.isRunning = !Globals.isRunning;
 
+            // Check to see if enter is pressed so we can slow or unslow the simulation
+            if(keyboard.IsKeyPressed(Keys.Enter))
+                Globals.isSlowed = !Globals.isSlowed;
+            
+
             // Make sure not to update when the simulation is paused
             if (!Globals.isRunning)
                 return;
