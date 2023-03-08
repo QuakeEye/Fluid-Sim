@@ -198,10 +198,10 @@ namespace Fluid_Sim {
             base.OnUpdateFrame(e);
 
             // Make sure to call the sim update
-            fluidSim.Update();
+            var keyboard = KeyboardState;
+            fluidSim.Update(keyboard);
 
             // Quit the program once escape key has been pressed
-            var keyboard = KeyboardState;
             if (keyboard[Keys.Escape]) terminated = true;
 
             //SetRandomColour();

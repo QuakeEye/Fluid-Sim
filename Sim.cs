@@ -1,4 +1,5 @@
 using OpenTK.Mathematics;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Fluid_Sim {
 
@@ -39,7 +40,7 @@ namespace Fluid_Sim {
 
             // Fill these fields with initial values
             Utils.Populate2DArray(velField, new Vector2(0f, 0f));
-            Utils.Populate2DArray(densField, 1f);
+            Utils.Populate2DArrayRandom(densField, 0.2f, 1f);
             // this still needs to be (properly) done
             // boundaries should also be set here, and should be initialised above
         }
@@ -47,7 +48,20 @@ namespace Fluid_Sim {
 
         // Function that will move a time step through the simulation, 
         //  should be called every frame
-        public void Update() {
+        public void Update(KeyboardState keyboard) {
+
+            // Check to see if spacebar is pressed so we can continue simulation
+            if(keyboard.IsKeyPressed(Keys.Space))
+                Globals.isRunning = !Globals.isRunning;
+
+            // Check to see if enter is pressed so we can slow or unslow the simulation
+            if(keyboard.IsKeyPressed(Keys.Enter))
+                Globals.isSlowed = !Globals.isSlowed;
+            
+
+            // Make sure not to update when the simulation is paused
+            if (!Globals.isRunning)
+                return;
 
             // Updating is made up of 3 main parts in this basic fluid sim:
             //  1. Diffuse the world, aka spread values through the world
@@ -121,6 +135,11 @@ namespace Fluid_Sim {
             // So, using the Gauss-Seidel method we will converge the sn (next step surrounding density)
             //  to the correct value, and then we can use that to calculate the next step density
 
+
+            // There shouldn't be a loop here anymore, it is now included in the solver
+            densField = Solvers.GaussSeidelSolve(densField, simSpaceSize, Globals.gsIters);
+
+            /*
             for (int x = 0; x < simSpaceSize.X; x++) {
                 for (int y = 0; y < simSpaceSize.Y; y++) {
 
@@ -128,19 +147,20 @@ namespace Fluid_Sim {
                     // Density field is densField
                     Vector2i currentCell = new Vector2i(x, y);
 
-                    float surrNext = Solvers.GaussSeidelSolve(  currentCell, 
-                                                                densField, 
+                    float surrNext = Solvers.GaussSeidelSolve(  densField, 
                                                                 simSpaceSize, 
                                                                 Globals.gsIters);
 
+                    // This code below now seems to be included in the gauss seidel solver
+
                     // After this, we can use this converged value to calculate the next density using
                     //  the equation above
-                    float densNext = (densField[x, y] + Globals.k * surrNext) / (1 + Globals.k);
+                    //float densNext = (densField[x, y] + Globals.k * surrNext) / (1 + Globals.k);
 
                     // And finally, we can set the next density to this newly calculated density
-                    densField[x, y] = densNext;
+                    //densField[x, y] = densNext;
                 }
-            }
+            }*/
         }
 
 
@@ -188,6 +208,8 @@ namespace Fluid_Sim {
                                                 y + j, 
                                                 Utils.mixColour(
                                                     new Vector3(
+                                                        0f,
+                                                        0f,
                                                         densField[x / widthScaler, y / heightScaler] * 255f
                                                 )));
                         }

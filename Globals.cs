@@ -9,5 +9,12 @@ namespace Fluid_Sim {
         // Constant members
         public const float gsIters = 20;
         public const float k = 0.001f;
+
+
+        // Simluation data members
+        public static bool isRunning = false;
+        public static bool isSlowed = true;
+
+        public const float slowDownValue = 1000000f;
     }
 }
