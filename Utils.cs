@@ -5,8 +5,13 @@ namespace Fluid_Sim {
     public static class Utils {
 
         // Convert a vector3 into integer colour, to use for surfaces
-        public static Func<Vector3, int> mixColour = 
+        public static Func<Vector3, int> MixColour = 
             (Vector3 c) => ((int)c.X<<16) + ((int)c.Y<<8) + (int)c.Z;
+
+
+        // Generate a float between a min and a max value
+        public static Func<float, float, float> RandomFloat =
+            (float min, float max) => (float) Globals.random.NextDouble() * (max - min) + min;
 
 
         /// <summary>
@@ -26,7 +31,7 @@ namespace Fluid_Sim {
                 (float) Globals.random.NextDouble() * 255f
             );
 
-            surf.Plot(x, y, mixColour(randomColour));
+            surf.Plot(x, y, MixColour(randomColour));
         }
 
 
@@ -46,7 +51,7 @@ namespace Fluid_Sim {
                 (float) Globals.random.NextDouble() * 255f
             );
 
-            arr[x, y] = mixColour(randomColour);
+            arr[x, y] = MixColour(randomColour);
         }
 
 
@@ -72,7 +77,19 @@ namespace Fluid_Sim {
 
             for (int i = 0; i < array.GetLength(0); i++)
                 for (int j = 0; j < array.GetLength(1); j++)
-                    array[i, j] = (float) Globals.random.NextDouble() * (max - min) + min;
+                    array[i, j] = RandomFloat(min, max);
+
+            return array;
+        }
+
+
+        public static Vector2[,] Populate2DVector2Array(Vector2[,] array, float min, float max) {
+
+            for (int i = 0; i < array.GetLength(0); i++)
+                for (int j = 0; j < array.GetLength(1); j++)
+                    array[i, j] = new Vector2(
+                        RandomFloat(min, max), RandomFloat(min, max)
+                    );
 
             return array;
         }

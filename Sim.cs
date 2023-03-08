@@ -39,7 +39,7 @@ namespace Fluid_Sim {
 
 
             // Fill these fields with initial values
-            Utils.Populate2DArray(velField, new Vector2(0f, 0f));
+            Utils.Populate2DVector2Array(velField, -1f, 1f);
             Utils.Populate2DArrayRandom(densField, 0.2f, 1f);
             // this still needs to be (properly) done
             // boundaries should also be set here, and should be initialised above
@@ -206,7 +206,7 @@ namespace Fluid_Sim {
                             // Let's draw the density field out to the screen for visual purposes
                             renderTarget.Plot(  x + i, 
                                                 y + j, 
-                                                Utils.mixColour(
+                                                Utils.MixColour(
                                                     new Vector3(
                                                         0f,
                                                         0f,
