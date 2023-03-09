@@ -224,7 +224,7 @@ namespace Fluid_Sim {
 
 
             // There shouldn't be a loop here anymore, it is now included in the solver
-            densField = Solvers.GaussSeidelSolve(densField, simSpaceSize, Globals.gsIters);
+            densField = Solvers.GaussSeidelSolveDiffuse(densField, simSpaceSize, Globals.gsIters);
 
             /*
             for (int x = 0; x < simSpaceSize.X; x++) {
@@ -301,7 +301,66 @@ namespace Fluid_Sim {
 
         private void ClearDivergence() {
 
+            // It is impossible to calculate a divergence-free velocity field
+            //  at least, I am not aware of any method to do this with my
+            //  limited research thus far
+            
+            // However, any velocity field is simply a sum of its divergence-free field
+            //  and its curl-free field, curl is not something we want to remove, but it
+            //  IS something we CAN remove, then we can subtract that from the original
+            //  field and thus obtain a divergence-free field
+            // (Velfield = Curlfree + Divergencefree) =>
+            // Divergencefree = Velfield - Curlfree
+            // This is known as the Holmheltz Decomposition
+            //  and this theorem of addition is known as Holmheltz's Theorem
 
+            // First, we need to calculate the divergence at each point in the field, which
+            //  includes calculating difference in x and in y velocities
+            //  which are then divided by their distance 2
+            // Positive divergence means mass flowing out, negative divergence means mass 
+            //  flowing in
+            float[,] divergenceField = new float[simSpaceSize.X, simSpaceSize.Y];
+
+            for (int x = 1; x < simSpaceSize.X - 1; x++) {
+                for (int y = 1; y < simSpaceSize.Y - 1; y++) {
+
+                    float xVelDiff = velField[x + 1, y].X - velField[x - 1, y].X;
+                    float yVelDiff = velField[x, y + 1].Y - velField[x, y - 1].Y;
+                    float divergence = (xVelDiff + yVelDiff) / 2;
+
+                    divergenceField[x, y] = divergence;
+                }
+            }
+
+            // Using gauss seidel, we will now approximate the project values
+            //  at every point in the field
+            float[,] projVals = Solvers.GaussSeidelSolveDivergence( divergenceField,
+                                                                    simSpaceSize,
+                                                                    Globals.gsIters);
+            
+            // Now that we have these values, we can construct a vector field that will
+            //  be free of curl
+            Vector2[,] curlFreeField = new Vector2[simSpaceSize.X, simSpaceSize.Y];
+
+            for(int x = 1; x < simSpaceSize.X - 1; x++) {
+                for(int y = 1; y < simSpaceSize.Y - 1; y++) {
+
+                    float xComponent = (projVals[x + 1, y] - projVals[x - 1, y]) / 2;
+                    float yComponent = (projVals[x, y + 1] - projVals[x, y - 1]) / 2;
+                    Vector2 curlFreeVec = new Vector2(xComponent, yComponent);
+
+                    curlFreeField[x, y] = curlFreeVec;
+                }
+            }
+
+            // Now we need to subtract this curl-free field from the actual field to
+            //  obtain a divergence-free field
+            for(int x = 1; x < simSpaceSize.X - 1; x++) {
+                for(int y = 1; y < simSpaceSize.Y - 1; y++) {
+
+                    velField[x, y] -= curlFreeField[x, y];
+                }
+            }
         }
 
 
