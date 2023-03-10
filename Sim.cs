@@ -107,6 +107,15 @@ namespace Fluid_Sim {
                 Globals.isSlowed = !Globals.isSlowed;
 
 
+            // Reset velocity field when pressing some defined button
+            if(InputHelper.CurrentKeyboardState.IsKeyPressed(Globals.velFieldReset))
+                velField = new Vector2[simSpaceSize.X, simSpaceSize.Y];
+
+            // Reset density field when pressing some defined button
+            if(InputHelper.CurrentKeyboardState.IsKeyPressed(Globals.densFieldReset))
+                densField = new float[simSpaceSize.X, simSpaceSize.Y];
+
+
             // If the mouse butting isn't currently being pressed, we should skip this step
             if(InputHelper.CurrentMouseState.IsButtonDown(MouseButton.Left)) {
 

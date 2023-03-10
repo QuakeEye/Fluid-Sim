@@ -1,4 +1,5 @@
 using OpenTK.Mathematics;
+using OpenTK.Windowing.GraphicsLibraryFramework;
 
 namespace Fluid_Sim {
 
@@ -9,7 +10,7 @@ namespace Fluid_Sim {
 
         
         // Render settings
-        public static Vector3 renderColour = new Vector3(234f, 172f, 137f);
+        public static Vector3 renderColour = new Vector3(212f, 241f, 249f);
 
 
         // Constant members
@@ -29,5 +30,8 @@ namespace Fluid_Sim {
         public const int mouseInputLeftSize = 3;
         public const int mouseInputRightSize = 3;
         public const float mouseDensitySetValue = 1;
+
+        public const Keys velFieldReset = Keys.Q;
+        public const Keys densFieldReset = Keys.W;
     }
 }
